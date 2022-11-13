@@ -4,7 +4,7 @@ Overview
 
 This topic modeling project analyzes IMDB Movie Review dataset (50000 reviews) from Kaggle collected by Standford. 
 The IMDB dataset contains movie reviews along with their associated binary sentiment polarity labels. 
-It is intended to serve as a benchmark for sentiment classification. But for our analysis, we focus more on topic identification instead of sentiment analysis, so we don't split these reviews for cross validation.
+It is intended to serve as a benchmark for sentiment classification. But in our analysis, we focus more on topic identification instead of sentiment analysis, so we don't split these reviews for cross validation.
 
 Dataset
 

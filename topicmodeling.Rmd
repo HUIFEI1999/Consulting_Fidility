@@ -14,7 +14,7 @@ library(dplyr)
 In this topic modeling assignment, we use the IMDB Movie Reviews (50K) dataset from Kaggle to analyze the review sentiment and pull out independent topic categories(i.e., movie genre) based on group of keywords.
 
 ## 1. The tidy text format
-First, we import data and break down each review into a list of words. Here, we tokenizing at word level and treat each review as a separate “document”. We mannually created a review number for each document since the movie titles for each review are not included in this dataset.
+First, we import data and break down each review into a list of words. Here, we tokenizing at word level and treat each review as a separate “document”. We mannually created a review number for each document since the movie titles for each review are not included in this dataset. Capitalization in reviews is kept for the initial screening. 
 
 ```{r}
 IMDB <- read.csv("IMDB Dataset.csv")
@@ -31,7 +31,7 @@ library(tidytext)
 
 # keep the CAPS for sentiment analysis 
 tidy_IMDB <- IMDB_df %>%
-  unnest_tokens(word, review, to_lower = FALSE)%>% anti_join(stop_words) 
+  unnest_tokens(word, review, to_lower = FALSE)%>% anti_join(stop_words)
 
 tidy_IMDB
 
@@ -48,6 +48,7 @@ tidy_IMDB %>%
   geom_col() +
   labs(y = NULL, title = "Word Frequency of Common Words (with CAPS)")
 ```
+
 From the frequency plot above, we can see that if we keep CAPS in each review, the most common words would include some words (such as pronouns) that are useless for sentiment analysis and topic identification, so we decide to lowecase all words.
 
 ```{r}
@@ -56,8 +57,11 @@ tidy_IMDB <- IMDB_df %>%
 
 tidy_IMDB
 ```
+`Stop_words` is a data frame from tidytext package that contains English stop words from three lexicons. Except for these stop-words, we also customize a list of domain specific stop-words. 
+
+See below:
 Add "br" to be a customized stop-word as it's a leftover from html format.
-Add "film", "movie" to stop-word as they are appearing in any review and meaningless
+Add "film", "movie" to customized stop-word as they are appearing in any review and meaningless
 
 ```{r}
 data(stop_words)

@@ -216,11 +216,6 @@ neg<-IMDB_df %>% filter(sentiment=='negative')
 
 pos.bigram<-get.bigram.tidy(pos)
 neg.bigram<-get.bigram.tidy(neg)
-#save(pos.bigram,neg.bigram,file='bigram.RData')
-```
-
-```{r}
-load('bigram.RData')
 ```
 
 ```{r fig.width=7,fig.height=7}

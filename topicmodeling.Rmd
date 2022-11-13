@@ -1,6 +1,6 @@
 ---
 title: "IMDB NLP"
-author: "Jiaqi Sun Huifei Xu, Hao He, Yaquan Yang"
+author: "Jiaqi Sun, Huifei Xu, Hao He, Yaquan Yang"
 date: "2022-10-16"
 output:
   pdf_document: default
@@ -11,8 +11,11 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 ```
+In this topic modeling assignment, we use the IMDB Movie Reviews (50K) dataset from Kaggle to analyze the review sentiment and pull out independent topic categories(i.e., movie genre) based on group of keywords.
 
 ## 1. The tidy text format
+First, we import data and break down each review into a list of words. Here, we tokenizing at word level and treat each review as a separate “document”.
+
 ```{r}
 IMDB <- read.csv("IMDB Dataset.csv")
 IMDB_df <- tibble(IMDB)
@@ -26,13 +29,33 @@ IMDB_df %>%
 ```{r}
 library(tidytext)
 
+# keep the CAPS for sentiment analysis 
 tidy_IMDB <- IMDB_df %>%
-  unnest_tokens(word, review)
+  unnest_tokens(word, review, to_lower = FALSE)%>% anti_join(stop_words) 
+
+tidy_IMDB
+
+# most common words
+tidy_IMDB %>% 
+count(word, sort = TRUE)
+
+#plot frequencies
+tidy_IMDB %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 9000) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL, title = "Word Frequency of Common Words (with CAPS)")
+```
+From the frequency plot above, we can see that if we keep CAPS in each review, the most common words would include some words (such as pronouns) that are useless for sentiment analysis and topic identification, so we decide to lowecase all words.
+
+```{r}
+tidy_IMDB <- IMDB_df %>%
+  unnest_tokens(word, review)%>% anti_join(stop_words) 
 
 tidy_IMDB
 ```
-
-
 Add "br" to be a customized stop-word as it's a leftover from html format.
 Add "film", "movie" to stop-word as they are appearing in any review and meaningless
 

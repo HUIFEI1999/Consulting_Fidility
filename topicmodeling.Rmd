@@ -49,7 +49,7 @@ tidy_IMDB %>%
   labs(y = NULL, title = "Word Frequency of Common Words (with CAPS)")
 ```
 
-From the frequency plot above, we can see that if we keep CAPS in each review, the most common words would include some words (such as pronouns) that are useless for sentiment analysis and topic identification, so we decide to lowecase all words.
+From the frequency plot above, we can see that if we keep CAPS in each review, the most common words would include some words (such as pronouns) that are useless for sentiment analysis and topic identification, so we decide to lowercase all words.
 
 ```{r}
 tidy_IMDB <- IMDB_df %>%

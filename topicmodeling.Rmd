@@ -164,6 +164,65 @@ bigram_counts
 
 ```
 
+bigram and visualisation for negative, positive remarks
+
+```{r}
+viz.bigram.graph <- function(bigrams,layout='fr') {
+  set.seed(2022)
+  a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+  
+  bigrams %>%
+    graph_from_data_frame() %>%
+    ggraph(layout = layout) +
+    geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, arrow = a) +
+    geom_node_point(color = "lightblue", size = 5) +
+    geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+    theme_void()+
+   coord_equal(clip='off')+
+   theme(plot.margin=unit(rep(2,4),'lines'))
+}
+```
+
+```{r}
+pos<-IMDB_df %>% filter(sentiment=='positive') 
+neg<-IMDB_df %>% filter(sentiment=='negative') 
+
+pos.bigram<-get.bigram.tidy(pos)
+neg.bigram<-get.bigram.tidy(neg)
+#save(pos.bigram,neg.bigram,file='bigram.RData')
+```
+
+```{r}
+load('bigram.RData')
+```
+
+```{r fig.width=7,fig.height=7}
+pos.bigram
+
+ig.pos<-pos.bigram %>%
+  dplyr::filter(n > 150,
+         !str_detect(word1, "\\d"),
+         !str_detect(word2, "\\d")) %>%
+   viz.bigram.graph() +
+   ggtitle('top bigrams (Freqency>=150) in positive remarks') 
+
+ig.pos
+```
+top bigram graph in negative remarks
+
+```{r fig.width=7,fig.height=7}
+neg.bigram
+
+ig.neg<-neg.bigram %>%
+  filter(n > 150,
+         !str_detect(word1, "\\d"),
+         !str_detect(word2, "\\d")) %>%
+   viz.bigram.graph() +
+   ggtitle('top bigrams (Freqency>=150) in negative remarks') 
+
+ig.neg   
+```
+
 <br>
 
 In other analyses, we may want to work with the recombined words. tidyr’s unite() function is the inverse of separate(), and lets us recombine the columns into one. Thus, “separate/filter/count/unite” let us find the most common bigrams not containing stop-words.

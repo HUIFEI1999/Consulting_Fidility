@@ -196,7 +196,7 @@ IMDB_bigrams %>%
 
 As one might expect, a lot of the most common bigrams are pairs of common (uninteresting) words, such as of the and to be: what we call “stop-words” (see Chapter 1). This is a useful time to use tidyr’s separate(), which splits a column into multiple based on a delimiter. This lets us separate it into two columns, “word1” and “word2”, at which point we can remove cases where either is a stop-word.
 
-```{r,warning=FALSE}
+```{r message=F,warning=F}
 library(tidyr)
 
 bigrams_separated <- IMDB_bigrams %>%
@@ -233,7 +233,7 @@ viz.bigram.graph <- function(bigrams,layout='fr') {
 }
 ```
 
-```{r,warning=FALSE}
+```{r eval=F}
 pos<-IMDB_df %>% filter(sentiment=='positive') 
 neg<-IMDB_df %>% filter(sentiment=='negative') 
 
@@ -241,7 +241,7 @@ pos.bigram<-get.bigram.tidy(pos)
 neg.bigram<-get.bigram.tidy(neg)
 ```
 
-```{r fig.width=7,fig.height=7,warning=FALSE}
+```{r fig.width=7,fig.height=7}
 pos.bigram
 
 ig.pos<-pos.bigram %>%
@@ -255,7 +255,7 @@ ig.pos
 ```
 top bigram graph in negative remarks
 
-```{r fig.width=7,fig.height=7,warning=FALSE}
+```{r fig.width=7,fig.height=7}
 neg.bigram
 
 ig.neg<-neg.bigram %>%
@@ -266,6 +266,56 @@ ig.neg<-neg.bigram %>%
    ggtitle('top bigrams (Freqency>=150) in negative remarks') 
 
 ig.neg   
+```
+From above two tables and graphs, we found some bigrams present
+both in negative remarks and positie remarks, for example, bigram of `special` and `effects` 
+occupied the first place in both ranklist!
+
+So we'are about to show top bigrams in positive remarks only and 
+negative remarks only and both in positive and negative remarks as following:
+
+```{r fig.width=9,fig.height=9}
+pos.top.bigram<-pos.bigram %>%
+  filter(n > 150,
+         !str_detect(word1, "\\d"),
+         !str_detect(word2, "\\d"))
+
+neg.top.bigram<-neg.bigram %>%
+  filter(n > 150,
+         !str_detect(word1, "\\d"),
+         !str_detect(word2, "\\d"))		 
+
+common<-inner_join(pos.top.bigram,neg.top.bigram,by=c('word1','word2')) %>%
+        mutate(n=n.x+n.y) %>% 
+        select(word1,word2,n) %>% 
+		mutate(remark='Negative and Positive')	
+		
+pos.only<-anti_join(pos.top.bigram,neg.top.bigram,by=c('word1','word2')) %>%
+          mutate(remark='Positive')
+
+
+neg.only<-anti_join(neg.top.bigram,pos.top.bigram,by=c('word1','word2')) %>%
+          mutate(remark='Negative')
+
+
+allbigram<-rbind(common,pos.only,neg.only)
+
+allbigram %>% group_by(remark) %>% slice_head(n=3)
+
+set.seed(2022)
+
+a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+
+allbigram %>% 
+graph_from_data_frame() %>%
+    ggraph(layout = 'fr') +
+    geom_edge_link(aes(colour=remark), show.legend = TRUE, arrow = a) +
+    geom_node_point(color = "lightblue", size = 2) +
+    geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+    theme_void()+
+    coord_equal(clip='off')+
+    theme(plot.margin=unit(rep(2,4),'lines'))+
+	scale_edge_colour_manual(values=c('forestgreen','black','darkred'))
 ```
 
 <br>

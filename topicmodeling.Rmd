@@ -29,13 +29,25 @@ First, we import data and break down each review into a list of words. Here, we 
 
 ```{r,warning=FALSE}
 IMDB <- read.csv("IMDB Dataset.csv")
+
+# TEST USE
+IMDB <- IMDB[1:5000,] # NEED REMOVE 
+
 IMDB_df <- tibble(IMDB)
 glimpse(IMDB_df)
 head(IMDB_df)
+```
 
+
+
+
+
+
+```{r}
 IMDB_df %>% 
   mutate(review_number = row_number()) ->IMDB_df 
 ```
+
 
 ```{r,warning=FALSE}
 
@@ -56,10 +68,15 @@ tidy_IMDB %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(n, word)) +
   geom_col() +
-  labs(y = NULL, title = "Word Frequency of Common Words (with CAPS)")
+  labs(y = NULL, title = "Word Frequency of Common Words (with CAPS)") +
+  xlab("Count of word")+
+  ylab("Most frequent indivual word")
 ```
 
 From the frequency plot above, we can see that if we keep CAPS in each review, the most common words would include some words (such as pronouns) that are useless for sentiment analysis and topic identification, so we decide to lowercase all words.
+
+
+
 
 ```{r}
 tidy_IMDB <- IMDB_df %>%

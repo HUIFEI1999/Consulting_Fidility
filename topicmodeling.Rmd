@@ -320,11 +320,25 @@ Latent Dirichlet allocation is one of the most common algorithms for topic model
 This function returns an object containing the full details of the model fit, such as how words are associated with topics and how topics are associated with documents.
 
 ```{r,warning=FALSE}
+# choose number of topics, 6
+k = 6
+
 # set a seed so that the output of the model is predictable
-IMDB_lda <- LDA(IMDB_dtm, k = 6, control = list(seed = 1234))
+IMDB_lda <- LDA(IMDB_dtm, k, control = list(seed = 1234))
 IMDB_lda
 #> A LDA_VEM topic model with 6 topics.
 ```
+To start to exploring the lda model, we list the most frequent 30 terms in the topic listed, in rank order.
+
+```{r}
+imdb.topics <- topicmodels::topics(IMDB_lda, 1)
+## In this case I am returning the top 30 terms.
+imdb.terms <- as.data.frame(topicmodels::terms(IMDB_lda, 30), stringsAsFactors = FALSE)
+imdb.terms[1:k]
+```
+
+
+
 
 The tidytext package provides this method for extracting the per-topic-per-word probabilities, called (“beta”), from the model.
 

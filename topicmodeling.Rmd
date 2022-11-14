@@ -20,6 +20,7 @@ library(topicmodels)
 library(wordcloud)
 library(tidytext)
 library(Rmpfr)
+library(tidyr)
 ```
 
 
@@ -40,9 +41,6 @@ IMDB_df <- tibble(IMDB)
 glimpse(IMDB_df)
 head(IMDB_df)
 ```
-
-
-
 
 
 
@@ -197,7 +195,6 @@ IMDB_bigrams %>%
 As one might expect, a lot of the most common bigrams are pairs of common (uninteresting) words, such as of the and to be: what we call “stop-words” (see Chapter 1). This is a useful time to use tidyr’s separate(), which splits a column into multiple based on a delimiter. This lets us separate it into two columns, “word1” and “word2”, at which point we can remove cases where either is a stop-word.
 
 ```{r message=F,warning=F}
-library(tidyr)
 
 bigrams_separated <- IMDB_bigrams %>%
   separate(bigram, c("word1", "word2"), sep = " ")

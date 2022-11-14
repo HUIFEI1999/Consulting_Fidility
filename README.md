@@ -1,3 +1,4 @@
-# Consulting_Fidility
+# Consulting_Fidelity
 2022 Fall BU MSSP
-yyq
+
+The readme file for topic modeling project is Topicmodeling_README.md

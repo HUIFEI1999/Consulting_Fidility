@@ -19,6 +19,7 @@ library(reshape2)
 library(topicmodels)
 library(wordcloud)
 library(tidytext)
+library(Rmpfr)
 ```
 
 
@@ -358,4 +359,91 @@ Besides estimating each topic as a mixture of words, LDA also models each docume
 IMDB_gamma <- tidy(IMDB_lda, matrix = "gamma")
 IMDB_gamma
 ```
+## 7. Topic Modeling extension: Determine k number of topics
+
+IN section 6, we assume the number of topics to be 6 to conduct the LDA since not pre-topic tags were provided. However, one major aspect of LDA, is that we need to know the exact k number of optimal topics for the documents. In order to accomplish this task, I am going to use a harmonic mean method to determine k based on Martin Ponweiser’s thesis：
+
+https://research.wu.ac.at/en/publications/latent-dirichlet-allocation-in-r-3
+
+First, we set up the fuction for computing the harmonic mean
+```{r}
+# The harmonic mean function
+harmonicMean <- function(logLikelihoods, precision = 2000L) {
+  llMed <- median(logLikelihoods)
+  as.double(llMed - log(mean(exp(-mpfr(logLikelihoods,
+                                       prec = precision) + llMed))))
+}
+```
+
+#note: change next following chunk!
+
+In order to find the best value for k, we do this over a sequence of topic models with different vales for k. This will generate numerous topic models with different numbers of topics, creating a vector to hold the k values.
+```{r}
+up_k <- 4 #change Here!
+
+#We will use a sequence of numbers from 2 to up_k
+seqk <- seq(2, up_k, 1)
+burnin <- 1000
+iter <- 1000
+keep <- 50
+fitted_many <- lapply(seqk, function(k) topicmodels::LDA(IMDB_dtm, k = k,
+                                                     method = "Gibbs",control = list(burnin = burnin,
+                                                                         iter = iter, keep = keep) ))
+
+# extract logliks from each topic
+logLiks_many <- lapply(fitted_many, function(L)  L@logLiks[-c(1:(burnin/keep))])
+
+# compute harmonic means
+hm_many <- sapply(logLiks_many, function(h) harmonicMean(h))
+
+```
+
+
+We could visualize the results of harmonic means by plotting the results
+```{r}
+ldaplot <- ggplot(data.frame(seqk, hm_many), aes(x=seqk, y=hm_many)) +
+  geom_path(lwd=1.5) +
+  theme(text = element_text(family= NULL),
+        axis.title.y=element_text(vjust=1, size=16),
+        axis.title.x=element_text(vjust=-.5, size=16),
+        axis.text=element_text(size=16),
+        plot.title=element_text(size=20)) +
+  xlab('Number of Topics') +
+  ylab('Harmonic Mean') +
+     annotate("text", x = 2, y = -80000, 
+              label = paste("The optimal number of topics is", 
+                            seqk[which.max(hm_many)])) +
+  ggtitle(expression(atop("Latent Dirichlet Allocation Analysis of IMDB", 
+                          atop(italic("How many distinct topics in thE Reviews?"),
+                               ""))))
+ldaplot
+```
+
+The following returns the optimal number of topics:
+```{r}
+seqk[which.max(hm_many)]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

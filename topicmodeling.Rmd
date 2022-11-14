@@ -9,7 +9,6 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
 ```
 ## Package usage
 
@@ -17,6 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(ggplot2)
 library(reshape2)
+library(topicmodels)
 library(wordcloud)
 library(tidytext)
 ```
@@ -282,7 +282,7 @@ IMDB_df %>%
 Just as some existing text mining packages provide document-term matrices as sample data or output, some algorithms expect such matrices as input. Therefore, tidytext provides cast_ verbs for converting from a tidy form to these matrices.
 
 ```{r,warning=FALSE}
-library(topicmodels)
+
 IMDB_dtm <- tidy_IMDB %>%
   count(review_number, word) %>% 
   cast_dtm(review_number, word, n)

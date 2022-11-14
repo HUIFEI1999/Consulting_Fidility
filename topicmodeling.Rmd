@@ -28,11 +28,13 @@ library(Rmpfr)
 ## 1. The tidy text format
 First, we import data and break down each review into a list of words. Here, we tokenizing at word level and treat each review as a separate “document”. We mannually created a review number for each document since the movie titles for each review are not included in this dataset. Capitalization in reviews is kept for the initial screening. 
 
+
+#note: change next following chunk!
 ```{r,warning=FALSE}
 IMDB <- read.csv("IMDB Dataset.csv")
 
-# TEST USE
-IMDB <- IMDB[1:5000,] # NEED REMOVE 
+
+IMDB <- IMDB[1:5000,] # NEED REMOVE,test use 
 
 IMDB_df <- tibble(IMDB)
 glimpse(IMDB_df)

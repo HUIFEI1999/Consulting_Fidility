@@ -4,7 +4,7 @@ author: "Jiaqi Sun, Huifei Xu, Hao He, Yaquan Yang"
 date: "2022-10-16"
 output:
   pdf_document: default
-  html_document: default
+  html_document: default 
 ---
 
 ```{r setup, include=FALSE}
@@ -17,7 +17,7 @@ In this topic modeling assignment, we use the IMDB Movie Reviews (50K) dataset f
 First, we import data and break down each review into a list of words. Here, we tokenizing at word level and treat each review as a separate “document”. We mannually created a review number for each document since the movie titles for each review are not included in this dataset. Capitalization in reviews is kept for the initial screening. 
 
 ```{r}
-IMDB <- read.csv("IMDB Dataset.csv")
+IMDB <- read.csv(url("https://github.com/HUIFEI1999/Consulting_Fidility/blob/55c0bbeeff14e380563c2c48460b41e675fb7b20/IMDB%20Dataset.csv"))
 IMDB_df <- tibble(IMDB)
 glimpse(IMDB_df)
 head(IMDB_df)

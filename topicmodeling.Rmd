@@ -34,7 +34,6 @@ First, we import data and break down each review into a list of words. Here, we 
 ```{r,warning=FALSE}
 IMDB <- read.csv("IMDB Dataset.csv")
 
-
 IMDB <- IMDB[1:5000,] # NEED REMOVE,test use 
 
 IMDB_df <- tibble(IMDB)
@@ -169,6 +168,13 @@ IMDB_tf_idf <-  tidy_IMDB %>%
 
 IMDB_tf_idf
 ```
+
+
+```{r}
+
+summary(IMDB_tf_idf)
+```
+
 <br>
 <br>
 
@@ -442,7 +448,7 @@ harmonicMean <- function(logLikelihoods, precision = 2000L) {
 
 In order to find the best value for k, we do this over a sequence of topic models with different vales for k. This will generate numerous topic models with different numbers of topics, creating a vector to hold the k values.
 ```{r}
-up_k <- 4 #change Here!
+up_k <- 6 #change Here!
 
 #We will use a sequence of numbers from 2 to up_k
 seqk <- seq(2, up_k, 1)

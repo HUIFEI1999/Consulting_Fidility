@@ -30,6 +30,8 @@ library(ggraph)
 library(stringr)
 library(qdap)
 library(ggthemes)
+library(SnowballC)
+library(textstem)
 ```
 
 
@@ -103,11 +105,11 @@ tidy_IMDB
 See below:
 
 Add "br" to be a customized stop-word as it's a leftover from html format.
-Add "film", "movie" to customized stop-word as they are appearing in any review and meaningless
-
+Add "film", "movie", "em" to customized stop-word as they are appearing in any review and meaningless
+ 
 ```{r}
 data(stop_words)
-stop_words <- bind_rows(tibble(word = c("br", "film", "movie", "films", "movies", "characters", "character", "story", "time","people", "watching", "scene", "scenes", "plot", "watch", "real", "cast", "director", "lot", "pretty", "10", "actors", "1", "oz", "makes", "2"), 
+stop_words <- bind_rows(tibble(word = c("br", "film", "movie", "films", "movies", "characters", "character", "story", "time","people", "watching", "scene", "scenes", "plot", "watch", "real", "cast", "director", "lot", "pretty", "10", "actors", "1", "oz", "makes", "2","em"), 
                                lexicon = c("custom")), 
                         stop_words)
 
@@ -116,7 +118,17 @@ tidy_IMDB <- tidy_IMDB %>%
 
 tidy_IMDB
 ```
+After remove all the stop-words, we try stemming and lemmatization. Stemming using rules to cut words down to their stems, operating on the word by itself. Lemmatization uses knowledge about a language’s structure to reduce words down to their lemmas, the canonical or dictionary forms of words, operating on the word in its context. As an important part of NLP pipelines, these methods would help us reduce the feature space of text data and should decrease the sparsity of text data. In this way, we may have a better fitted LDA model in the later process.
 
+```{r}
+# stemming and lemmatization
+library(textstem)
+lemmatization <- tidy_IMDB %>% mutate(lemma = word%>% lemmatize_words())
+
+library(SnowballC)
+stemming <- tidy_IMDB %>% mutate(stem = wordStem(word))
+
+```
 
 ```{r,warning=FALSE}
 tidy_IMDB %>%
@@ -434,6 +446,7 @@ IMDB_dtm <- tidy_IMDB %>%
   cast_dtm(review_number, word, n)
 
 IMDB_dtm
+# IMDB_dtm has sparsity of 100%, but has more terms: 118916
 ```
 
 <br>
@@ -495,6 +508,82 @@ top_terms %>%
   scale_y_reordered()
 ```
 
+Now we use data after stemming and lemmatization to see if we have a improved results for topic identification. Because stemming would convert "plays" to "plai" which may not be easy for us to interpret the modeling results, we use lemmatized data to fit the model.
+```{r}
+# LDA model fitting after stemming and lemmatization
+
+lemma_dtm <- lemmatization%>% count(review_number, lemma) %>% 
+  cast_dtm(review_number, lemma, n)
+# lemma_dtm still has sparsity of 100%, but has less terms: 100852
+
+lemma_lda <- LDA(lemma_dtm, k = 6, control = list(seed = 1234))
+
+lemma_topics <- tidy(lemma_lda, matrix = "beta")
+
+lemma_top_terms <- lemma_topics %>%
+  group_by(topic) %>%
+  slice_max(beta, n = 10) %>% 
+  ungroup() %>%
+  arrange(topic, -beta)
+
+library(ggplot2)
+
+lemma_top_terms %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered()+
+  labs(title = "lemmatization - LDA model results")
+```
+Based on the output, setting topic(K) to 6 is cannot really help us distinguish one topic from the other one.
+So we increase K to 10 given the data size of our dataset. 
+
+```{r}
+IMDB_lda <- LDA(IMDB_dtm, k = 10, control = list(seed = 1234))
+
+IMDB_topics <- tidy(IMDB_lda, matrix = "beta")
+top_terms <- IMDB_topics %>%
+  group_by(topic) %>%
+  slice_max(beta, n = 10) %>% 
+  ungroup() %>%
+  arrange(topic, -beta)
+library(ggplot2)
+
+top_terms %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered()
+
+# LDA model fitting after stemming and lemmatization
+
+lemma_dtm <- lemmatization%>% count(review_number, lemma) %>% 
+  cast_dtm(review_number, lemma, n)
+# lemma_dtm has sparsity of 100%, but has less terms: 100852
+
+lemma_lda <- LDA(lemma_dtm, k = 10, control = list(seed = 1234))
+
+lemma_topics <- tidy(lemma_lda, matrix = "beta")
+
+lemma_top_terms <- lemma_topics %>%
+  group_by(topic) %>%
+  slice_max(beta, n = 10) %>% 
+  ungroup() %>%
+  arrange(topic, -beta)
+
+library(ggplot2)
+
+lemma_top_terms %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered()+
+  labs(title = "lemmatization - LDA model results")
+```
+
 Besides estimating each topic as a mixture of words, LDA also models each document as a mixture of topics. We can examine the per-document-per-topic probabilities, called  (“gamma”), with the matrix = "gamma" argument to tidy().
  
 ```{r,warning=FALSE}
@@ -503,7 +592,7 @@ IMDB_gamma
 ```
 ## 7. Topic Modeling extension: Determine k number of topics
 
-IN section 6, we assume the number of topics to be 6 to conduct the LDA since not pre-topic tags were provided. However, one major aspect of LDA, is that we need to know the exact k number of optimal topics for the documents. In order to accomplish this task, I am going to use a harmonic mean method to determine k based on Martin Ponweiser’s thesis：
+IN section 6, we assume the number of topics to be 6 to conduct the LDA since not pre-topic tags were provided. However, one major aspect of LDA, is that we need to know the exact k number of optimal topics for the documents. In order to accomplish this task, we are going to use a harmonic mean method to determine k based on Martin Ponweiser’s thesis：
 
 https://research.wu.ac.at/en/publications/latent-dirichlet-allocation-in-r-3
 
@@ -523,7 +612,7 @@ In order to find the best value for k, we do this over a sequence of topic model
 ```{r}
 up_k <- 6 #change Here!
 
-#We will use a sequence of numbers from 2 to up_k
+# We will use a sequence of numbers from 2 to up_k
 seqk <- seq(2, up_k, 1)
 burnin <- 1000
 iter <- 1000

@@ -17,6 +17,7 @@ Jiaqi Sun: custom stop-word, sentiment analysis, n-grams and correlation, LDA <b
 Yaquan Yang: n-grams and visualisation for negative, positive remarks <br>
 Hao He: CAPS effect on sentiment analysis, stemming and lemmatization, LDA <br>
 Huifei Xu: polarity & visualiztion for Sentiment Analysis; topics exploration Sec.7; Miscellaneous details handling <br>
+All members collaborate on the report generation.
 
 Running time issue
 

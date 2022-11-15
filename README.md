@@ -13,9 +13,15 @@ The core dataset contains 50,000 reviews split evenly into 25k train and 25k tes
 
 Contribution
 
+Jiaqi Sun: custom stop-word, sentiment analysis, n-grams and correlation, LDA <br>
 Yaquan Yang: n-grams and visualisation for negative, positive remarks <br>
-Hao He: CAPS effect on text analysis, stemming and lemmatization <br>
-Huifei Xu: polarity&visualiztion for SA; topics exploration Sec.7; Miscellaneous details handling <br>
+Hao He: CAPS effect on sentiment analysis, stemming and lemmatization <br>
+Huifei Xu: polarity & visualiztion for Sentiment Analysis; topics exploration Sec.7; Miscellaneous details handling <br>
+
+Running time issue
+
+1. When we use qdap package to plot the polarity of IMDB reviews, the running time range from 1 to 2 hours depending on the computer's CPU.
+
 
 
 

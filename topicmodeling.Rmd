@@ -47,7 +47,8 @@ IMDB <- read.csv("IMDB Dataset.csv")
 #IMDB <- IMDB[1:5000,] # NEED REMOVE,test use 
 
 IMDB_df <- tibble(IMDB)
-glimpse(IMDB_df)
+# glimpse(IMDB_df)
+# two columns: `sentiment` indicates whether the review is labeled negative or positive; `review` includes the text of each review.
 head(IMDB_df)
 ```
 

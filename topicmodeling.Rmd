@@ -42,11 +42,8 @@ In this topic modeling assignment, we use the IMDB Movie Reviews (50K) dataset f
 First, we import data and break down each review into a list of words. Here, we tokenize at word level and treat each review as a separate “document”. We manually created a review number for each document since the movie titles for each review are not included in this dataset. Capitalization in reviews is kept for the initial screening. 
 
 
-#note: change next following chunk!
 ```{r,warning=FALSE}
 IMDB <- read.csv("IMDB Dataset.csv")
-
-#IMDB <- IMDB[1:5000,] # NEED REMOVE,test use 
 
 IMDB_df <- tibble(IMDB)
 # glimpse(IMDB_df)
@@ -548,22 +545,13 @@ Based on the output, setting topic(K) to 6 cannot really help us distinguish one
 So we increase K to 10 given the data size of our dataset. 
 
 ```{r}
-IMDB_lda <- LDA(IMDB_dtm, k = 10, control = list(seed = 1234))
+# choose nnumber of topics, 10
+k = 10
+IMDB_lda <- LDA(IMDB_dtm, k, control = list(seed = 1234))
 
 IMDB_topics <- tidy(IMDB_lda, matrix = "beta")
-top_terms <- IMDB_topics %>%
-  group_by(topic) %>%
-  slice_max(beta, n = 10) %>% 
-  ungroup() %>%
-  arrange(topic, -beta)
-library(ggplot2)
-
-top_terms %>%
-  mutate(term = reorder_within(term, beta, topic)) %>%
-  ggplot(aes(beta, term, fill = factor(topic))) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free") +
-  scale_y_reordered()
+imdb.terms <- as.data.frame(topicmodels::terms(IMDB_lda, 30), stringsAsFactors = FALSE)
+imdb.terms[1:k]
 
 # LDA model fitting after stemming and lemmatization
 
@@ -571,25 +559,12 @@ lemma_dtm <- lemmatization%>% count(review_number, lemma) %>%
   cast_dtm(review_number, lemma, n)
 # lemma_dtm has sparsity of 100%, but has less terms: 100852
 
-lemma_lda <- LDA(lemma_dtm, k = 10, control = list(seed = 1234))
+lemma_lda <- LDA(lemma_dtm, k, control = list(seed = 1234))
 
 lemma_topics <- tidy(lemma_lda, matrix = "beta")
+lemma_terms <- as.data.frame(topicmodels::terms(lemma_lda, 30), stringsAsFactors = FALSE)
+lemma_terms[1:k]
 
-lemma_top_terms <- lemma_topics %>%
-  group_by(topic) %>%
-  slice_max(beta, n = 10) %>% 
-  ungroup() %>%
-  arrange(topic, -beta)
-
-library(ggplot2)
-
-lemma_top_terms %>%
-  mutate(term = reorder_within(term, beta, topic)) %>%
-  ggplot(aes(beta, term, fill = factor(topic))) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free") +
-  scale_y_reordered()+
-  labs(title = "lemmatization - LDA model results")
 ```
 
 Besides estimating each topic as a mixture of words, LDA also models each document as a mixture of topics. We can examine the per-document-per-topic probabilities, called  (“gamma”), with the matrix = "gamma" argument to tidy().

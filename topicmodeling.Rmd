@@ -606,7 +606,7 @@ harmonicMean <- function(logLikelihoods, precision = 2000L) {
 
 In order to find the best value for k, we do this over a sequence of topic models with different vales for k. This will generate numerous topic models with different numbers of topics, creating a vector to hold the k values.
 ```{r}
-up_k <- 6 #change Here!
+up_k <- 10 #change Here!
 
 # We will use a sequence of numbers from 2 to up_k
 seqk <- seq(2, up_k, 1)
@@ -627,7 +627,7 @@ hm_many <- sapply(logLiks_many, function(h) harmonicMean(h))
 
 
 We could visualize the results of harmonic means by plotting the results
-```{r}
+```{r,warning=FALSE}
 ldaplot <- ggplot(data.frame(seqk, hm_many), aes(x=seqk, y=hm_many)) +
   geom_path(lwd=1.5) +
   theme(text = element_text(family= NULL),
@@ -637,9 +637,6 @@ ldaplot <- ggplot(data.frame(seqk, hm_many), aes(x=seqk, y=hm_many)) +
         plot.title=element_text(size=20)) +
   xlab('Number of Topics') +
   ylab('Harmonic Mean') +
-     annotate("text", x = 2, y = -80000, 
-              label = paste("The optimal number of topics is", 
-                            seqk[which.max(hm_many)])) +
   ggtitle(expression(atop("Latent Dirichlet Allocation Analysis of IMDB", 
                           atop(italic("How many distinct topics in thE Reviews?"),
                                ""))))

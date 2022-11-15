@@ -446,7 +446,7 @@ IMDB_dtm <- tidy_IMDB %>%
   cast_dtm(review_number, word, n)
 
 IMDB_dtm
-# IMDB_dtm has sparsity of 100%, but has more terms: 118916
+
 ```
 
 <br>

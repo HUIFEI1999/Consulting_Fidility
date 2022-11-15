@@ -112,7 +112,7 @@ tidy_IMDB <- tidy_IMDB %>%
 
 tidy_IMDB
 ```
-After remove all the stop-words, we try stemming and lemmatization. Stemming using rules to cut words down to their stems, operating on the word by itself. Lemmatization uses knowledge about a language’s structure to reduce words down to their lemmas, the canonical or dictionary forms of words, operating on the word in its context. As an important part of NLP pipelines, these methods would help us reduce the feature space of text data and should decrease the sparsity of text data. In this way, we may have a better fitted LDA model in the later process.
+After remove all the stop-words, we try stemming and lemmatization. Stemming using rules to cut words down to their stems, operating on the word by itself. Lemmatization uses knowledge about a language’s structure to reduce words down to their lemmas, the canonical or dictionary forms of words, operating on the word in its context. As an important part of NLP pipelines, these methods would help us reduce the feature space of text data and should decrease the sparsity of text data. In this way, we may have a better fitted LDA model.
 
 ```{r,warning=FALSE}
 # stemming and lemmatization

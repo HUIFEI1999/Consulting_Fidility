@@ -23,6 +23,11 @@ library(tidytext)
 library(Rmpfr)
 library(tidyr)
 library(tm)
+library(ggraph)
+library(grid)
+library(igraph)
+library(ggraph)
+library(stringr)
 library(qdap)
 library(ggthemes)
 ```
@@ -39,7 +44,7 @@ First, we import data and break down each review into a list of words. Here, we 
 ```{r,warning=FALSE}
 IMDB <- read.csv("IMDB Dataset.csv")
 
-IMDB <- IMDB[1:5000,] # NEED REMOVE,test use 
+#IMDB <- IMDB[1:5000,] # NEED REMOVE,test use 
 
 IMDB_df <- tibble(IMDB)
 glimpse(IMDB_df)
@@ -270,6 +275,20 @@ bigram_counts
 
 bigram and visualisation for negative, positive remarks
 
+```{r message=F,warning=F}
+get.bigram.tidy<-function(df)
+{
+df %>%
+  unnest_tokens(bigram, review, token = "ngrams", n = 2) %>%
+  filter(!is.na(bigram)) %>%
+  separate(bigram, c("word1", "word2"), sep = " ") %>%
+  filter(!word1 %in% stop_words$word) %>%
+  filter(!word2 %in% stop_words$word) %>%
+  count(word1, word2, sort = TRUE)
+}
+```
+
+
 ```{r,warning=FALSE}
 viz.bigram.graph <- function(bigrams,layout='fr') {
   set.seed(2022)
@@ -278,7 +297,7 @@ viz.bigram.graph <- function(bigrams,layout='fr') {
   bigrams %>%
     graph_from_data_frame() %>%
     ggraph(layout = layout) +
-    geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, arrow = a) +
+    geom_edge_link( show.legend = FALSE, arrow = a) +
     geom_node_point(color = "lightblue", size = 5) +
     geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
     theme_void()+
@@ -287,7 +306,7 @@ viz.bigram.graph <- function(bigrams,layout='fr') {
 }
 ```
 
-```{r eval=F}
+```{r}
 pos<-IMDB_df %>% filter(sentiment=='positive') 
 neg<-IMDB_df %>% filter(sentiment=='negative') 
 

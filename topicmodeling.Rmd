@@ -10,6 +10,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 ## Package usage
 
 ```{r,warning=FALSE}
@@ -30,6 +31,7 @@ library(ggthemes)
 In this topic modeling assignment, we use the IMDB Movie Reviews (50K) dataset from Kaggle to analyze the review sentiment and pull out independent topic categories(i.e., movie genre) based on group of keywords.
 
 ## 1. The tidy text format
+
 First, we import data and break down each review into a list of words. Here, we tokenizing at word level and treat each review as a separate “document”. We manually created a review number for each document since the movie titles for each review are not included in this dataset. Capitalization in reviews is kept for the initial screening. 
 
 
@@ -71,7 +73,8 @@ tidy_IMDB %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(n, word)) +
   geom_col() +
-  labs(y = NULL, title = "Word Frequency of Common Words (with CAPS)") +
+  labs(y = NULL,
+       title = "Word Frequency of Common Words (with CAPS)") +
   xlab("Count of word")+
   ylab("Most frequent indivual word")
 ```
@@ -83,31 +86,40 @@ From the frequency plot above, we can see that if we keep CAPS in each review, t
 
 ```{r}
 tidy_IMDB <- IMDB_df %>%
-  unnest_tokens(word, review)%>% anti_join(stop_words) 
+  unnest_tokens(word, review)%>%
+  anti_join(stop_words) 
 
 tidy_IMDB
 ```
+
 `Stop_words` is a data frame from tidytext package that contains English stop words from three lexicons. Except for these stop-words, we also customize a list of domain specific stop-words. 
 
 See below:
+
 Add "br" to be a customized stop-word as it's a leftover from html format.
 Add "film", "movie" to customized stop-word as they are appearing in any review and meaningless
 
 ```{r}
 data(stop_words)
-stop_words <- bind_rows(tibble(word = c("br", "film", "movie", "films", "movies", "characters", "character", "story", "time","people", "watching", "scene", "scenes", "plot", "watch", "real", "cast", "director", "lot", "pretty", "10", "actors", "1", "oz", "makes", "2"), lexicon = c("custom")), stop_words)
+stop_words <- bind_rows(tibble(word = c("br", "film", "movie", "films", "movies", "characters", "character", "story", "time","people", "watching", "scene", "scenes", "plot", "watch", "real", "cast", "director", "lot", "pretty", "10", "actors", "1", "oz", "makes", "2"), 
+                               lexicon = c("custom")), 
+                        stop_words)
 
 tidy_IMDB <- tidy_IMDB %>%
   anti_join(stop_words)
 
 tidy_IMDB
 ```
+
+
 ```{r,warning=FALSE}
 tidy_IMDB %>%
   count(sentiment, word, sort = TRUE) 
 ```
 
+
 ```{r,warning=FALSE}
+
 #The most common words in IMDB comments
 tidy_IMDB %>%
   count(word, sort = TRUE) %>%
@@ -120,8 +132,10 @@ tidy_IMDB %>%
 
 
 ```{r,warning=FALSE}
+
 tidy_IMDB %>% 
   count(sentiment)
+
 ```
 
 <br>
@@ -129,6 +143,7 @@ tidy_IMDB %>%
 
 ## 2. Sentiment analysis with tidy data
 ```{r,warning=FALSE}
+
 bing_word_counts <- tidy_IMDB %>%
   count(word, sentiment, sort = TRUE) %>%
   ungroup()
@@ -137,6 +152,7 @@ bing_word_counts
 ```
 
 ```{r,warning=FALSE}
+
 #Words that contribute to positive and negative sentiment in IMDB
 bing_word_counts %>%
   group_by(sentiment) %>%
@@ -150,8 +166,10 @@ bing_word_counts %>%
        y = NULL)
 ```
 
+
 ```{r,warning=FALSE}
 # Most common positive and negative words in IMDB
+
 tidy_IMDB %>%
   count(word, sentiment, sort = TRUE) %>%
   acast(word ~ sentiment, value.var = "n", fill = 0) %>%
@@ -165,7 +183,9 @@ table(IMDB$sentiment)
 The polarity function scans the subjectivity lexicon for positive and negative words, and we can further visualize the following results to compare with our sentiment tags. The subjective dictionary used by the qdap package contains about 6800 words with tags, which would be introduced here to help measuring the density of keywords
 
 ```{r}
+
 Sys.setlocale("LC_ALL", "C")
+
 imdb.pol<-polarity(as.character(IMDB$review))
 
 ggplot(imdb.pol$all,aes(x=polarity,y=..density..))+
@@ -190,6 +210,7 @@ ggplot(imdb.pol$all,aes(x=polarity,y=..density..))+
 
 ## 3. Analyzing word and document frequency: tf-idf
 ```{r,warning=FALSE}
+
 IMDB_tf_idf <-  tidy_IMDB %>%
   count(review_number, word, sort = TRUE) %>% 
   bind_tf_idf(word, review_number, n) %>% 
@@ -213,6 +234,7 @@ The inverse document frequency (and thus tf-idf) is very low (near zero) for wor
 <br>
 
 ## 4. Relationships between words: n-grams and correlations
+
 ```{r,warning=FALSE}
 IMDB_bigrams <- IMDB_df %>%
   unnest_tokens(bigram, review, token = "ngrams", n = 2) %>%
@@ -285,6 +307,7 @@ ig.pos<-pos.bigram %>%
 
 ig.pos
 ```
+
 top bigram graph in negative remarks
 
 ```{r fig.width=7,fig.height=7}
@@ -299,6 +322,7 @@ ig.neg<-neg.bigram %>%
 
 ig.neg   
 ```
+
 From above two tables and graphs, we found some bigrams present
 both in negative remarks and positie remarks, for example, bigram of `special` and `effects` 
 occupied the first place in both ranklist!

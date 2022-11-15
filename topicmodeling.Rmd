@@ -499,7 +499,7 @@ IMDB_topics <- tidy(IMDB_lda, matrix = "beta")
 IMDB_topics
 ```
 
-We could use dplyr’s slice_max() to find the 10 terms that are most common within each topic.
+We could use dplyr’s slice_max() to find the 10 terms that are most common within each topic and ceate a visualization.
 ```{r,warning=FALSE}
 top_terms <- IMDB_topics %>%
   group_by(topic) %>%
@@ -507,12 +507,6 @@ top_terms <- IMDB_topics %>%
   ungroup() %>%
   arrange(topic, -beta)
 
-top_terms
-```
-
-As a tidy data frame, this lends itself well to a ggplot2 visualization.
-
-```{r,warning=FALSE}
 top_terms %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(beta, term, fill = factor(topic))) +
@@ -520,6 +514,7 @@ top_terms %>%
   facet_wrap(~ topic, scales = "free") +
   scale_y_reordered()
 ```
+
 
 Now we use data after stemming and lemmatization to see if we have a improved results for topic identification. Because stemming would convert "plays" to "plai" which can be confusing for us to interpret the modeling results, we use lemmatized data to fit the model.
 ```{r}
@@ -530,6 +525,8 @@ lemma_dtm <- lemmatization%>% count(review_number, lemma) %>%
 # lemma_dtm still has sparsity of 100%, but has less terms: 100852
 
 lemma_lda <- LDA(lemma_dtm, k, control = list(seed = 1234))
+lemma_terms <- as.data.frame(topicmodels::terms(lemma_lda, 30), stringsAsFactors = FALSE)
+lemma_terms[1:k]
 
 lemma_topics <- tidy(lemma_lda, matrix = "beta")
 

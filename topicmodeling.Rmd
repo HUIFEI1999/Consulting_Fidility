@@ -486,7 +486,7 @@ To start to exploring the lda model, we list the most frequent 30 terms in the t
 
 ```{r}
 imdb.topics <- topicmodels::topics(IMDB_lda, 1)
-## In this case I am returning the top 30 terms.
+## In this case the output returns the top 30 terms.
 imdb.terms <- as.data.frame(topicmodels::terms(IMDB_lda, 30), stringsAsFactors = FALSE)
 imdb.terms[1:k]
 ```

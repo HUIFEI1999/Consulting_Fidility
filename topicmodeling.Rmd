@@ -132,7 +132,6 @@ tidy_IMDB %>%
   count(sentiment, word, sort = TRUE) 
 ```
 
-
 ```{r,warning=FALSE}
 
 #The most common words in IMDB comments
@@ -142,8 +141,27 @@ tidy_IMDB %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(n, word)) +
   geom_col() +
-  labs(y = NULL)
+  labs(y = NULL,title = "most common words before lemmatization and stemming" )
+
+# The most common words after lemmatization
+lemmatization %>%
+  count(lemma, sort = TRUE) %>%
+  filter(n > 6000) %>%
+  mutate(lemma = reorder(lemma, n)) %>%
+  ggplot(aes(n, lemma)) +
+  geom_col() +
+  labs(y = NULL, title = "most common words after lemmatization")
+
+# The most common words after stemming
+stemming %>%
+  count(stem, sort = TRUE) %>%
+  filter(n > 8000) %>%
+  mutate(stem = reorder(stem, n)) %>%
+  ggplot(aes(n, stem)) +
+  geom_col() +
+  labs(y = NULL, title = "most common words after stemming")
 ```
+It's easy to see that stemming would convert "plays" to "plai", while in lemmatization it would be "play". 
 
 
 ```{r,warning=FALSE}

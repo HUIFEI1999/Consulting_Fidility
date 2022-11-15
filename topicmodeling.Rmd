@@ -529,7 +529,7 @@ lemma_dtm <- lemmatization%>% count(review_number, lemma) %>%
   cast_dtm(review_number, lemma, n)
 # lemma_dtm still has sparsity of 100%, but has less terms: 100852
 
-lemma_lda <- LDA(lemma_dtm, k = 6, control = list(seed = 1234))
+lemma_lda <- LDA(lemma_dtm, k, control = list(seed = 1234))
 
 lemma_topics <- tidy(lemma_lda, matrix = "beta")
 
@@ -549,7 +549,7 @@ lemma_top_terms %>%
   scale_y_reordered()+
   labs(title = "lemmatization - LDA model results")
 ```
-Based on the output, setting topic(K) to 6 is cannot really help us distinguish one topic from the other one.
+Based on the output, setting topic(K) to 6 cannot really help us distinguish one topic from the other one.
 So we increase K to 10 given the data size of our dataset. 
 
 ```{r}

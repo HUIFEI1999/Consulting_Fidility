@@ -482,6 +482,7 @@ IMDB_lda <- LDA(IMDB_dtm, k, control = list(seed = 1234))
 IMDB_lda
 #> A LDA_VEM topic model with 6 topics.
 ```
+
 To start to exploring the lda model, we list the most frequent 30 terms in the topic listed, in rank order.
 
 ```{r}
@@ -490,9 +491,6 @@ imdb.topics <- topicmodels::topics(IMDB_lda, 1)
 imdb.terms <- as.data.frame(topicmodels::terms(IMDB_lda, 30), stringsAsFactors = FALSE)
 imdb.terms[1:k]
 ```
-
-
-
 
 The tidytext package provides this method for extracting the per-topic-per-word probabilities, called (“beta”), from the model.
 
@@ -523,7 +521,7 @@ top_terms %>%
   scale_y_reordered()
 ```
 
-Now we use data after stemming and lemmatization to see if we have a improved results for topic identification. Because stemming would convert "plays" to "plai" which may not be easy for us to interpret the modeling results, we use lemmatized data to fit the model.
+Now we use data after stemming and lemmatization to see if we have a improved results for topic identification. Because stemming would convert "plays" to "plai" which can be confusing for us to interpret the modeling results, we use lemmatized data to fit the model.
 ```{r}
 # LDA model fitting after stemming and lemmatization
 

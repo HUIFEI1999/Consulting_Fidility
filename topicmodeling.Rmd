@@ -602,11 +602,10 @@ harmonicMean <- function(logLikelihoods, precision = 2000L) {
 }
 ```
 
-#note: change next following chunk!
 
 In order to find the best value for k, we do this over a sequence of topic models with different vales for k. This will generate numerous topic models with different numbers of topics, creating a vector to hold the k values.
 ```{r}
-up_k <- 10 #change Here!
+up_k <- 10 
 
 # We will use a sequence of numbers from 2 to up_k
 seqk <- seq(2, up_k, 1)
@@ -642,8 +641,9 @@ ldaplot <- ggplot(data.frame(seqk, hm_many), aes(x=seqk, y=hm_many)) +
                                ""))))
 ldaplot
 ```
+From the plot above, we can see that the optimal number of topics for our model is 10.
 
-The following returns the optimal number of topics:
+The following code returns the optimal number of topics:
 ```{r}
 seqk[which.max(hm_many)]
 ```

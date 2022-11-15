@@ -13,8 +13,9 @@ The core dataset contains 50,000 reviews split evenly into 25k train and 25k tes
 
 Contribution
 
-Yaquan Yang: n-grams and visualisation for negative, positive remarks
-Hao He: CAPS effect on text analysis, stemming and lemmatization
+Yaquan Yang: n-grams and visualisation for negative, positive remarks <br>
+Hao He: CAPS effect on text analysis, stemming and lemmatization <br>
+Huifei Xu: polarity&visualiztion for SA; topics exploration Sec.7; Miscellaneous details handling <br>
 
 
 

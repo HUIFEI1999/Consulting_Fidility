@@ -433,7 +433,7 @@ bigrams_united
 ```
 <br>
 
-In other analyses you may be interested in the most common trigrams, which are consecutive sequences of 3 words. We can find this by setting n = 3:
+In other analyses, we may be interested in the most common trigrams, which are consecutive sequences of 3 words. We can find this by setting n = 3:
 
 ```{r,warning=FALSE}
 IMDB_df %>%

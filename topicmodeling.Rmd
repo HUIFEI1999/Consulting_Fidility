@@ -21,6 +21,9 @@ library(wordcloud)
 library(tidytext)
 library(Rmpfr)
 library(tidyr)
+library(tm)
+library(qdap)
+library(ggthemes)
 ```
 
 
@@ -155,6 +158,32 @@ tidy_IMDB %>%
   comparison.cloud(colors = c("gray20", "gray80"),
                    max.words = 100)
 ```
+
+```{r}
+table(IMDB$sentiment)
+```
+The polarity function scans the subjectivity lexicon for positive and negative words, and we can further visualize the following results to compare with our sentiment tags. The subjective dictionary used by the qdap package contains about 6800 words with tags, which would be introduced here to help measuring the density of keywords
+
+```{r}
+Sys.setlocale("LC_ALL", "C")
+imdb.pol<-polarity(as.character(IMDB$review))
+
+ggplot(imdb.pol$all,aes(x=polarity,y=..density..))+
+  theme_gdocs()+
+  geom_histogram(binwidth=0.2,
+                 fill= "#69b3a2",
+                 colour="#e9ecef",
+                 alpha=0.9,
+                 size=0.2)+
+  geom_density(size=0.75,
+               fill="blue",
+               adjust=1.5,
+               alpha=0.4,
+               color="#69b3a2")+
+  ggtitle("qdap's positive and negative word ratings")
+
+```
+
 
 <br>
 <br>

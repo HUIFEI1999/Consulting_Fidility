@@ -536,8 +536,6 @@ lemma_top_terms <- lemma_topics %>%
   ungroup() %>%
   arrange(topic, -beta)
 
-library(ggplot2)
-
 lemma_top_terms %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(beta, term, fill = factor(topic))) +

@@ -22,7 +22,7 @@ Huifei Xu: polarity & visualiztion for Sentiment Analysis; topics exploration Se
 Running time issue
 
 1. When we use polarity function from qdap package to plot the polarity of IMDB reviews, the running time range from 20 to 1 hour depending on the computer's CPU.
-2. The running time of the harmonic mean function in Section 7 is about 20 minutes.
+2. The running time of the harmonic mean function in Section 7 is about 40 minutes.
 
 Method for determine k
 

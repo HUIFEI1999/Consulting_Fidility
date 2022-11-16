@@ -3,8 +3,8 @@ title: "IMDB NLP"
 author: "Jiaqi Sun, Huifei Xu, Hao He, Yaquan Yang"
 date: "2022-10-16"
 output:
-  pdf_document: default
   html_document: default 
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Package usage
 
-```{r,warning=FALSE}
+```{r, message=FALSE,warning=FALSE}
 library(dplyr)
 library(ggplot2)
 library(reshape2)
@@ -34,30 +34,25 @@ library(SnowballC)
 library(textstem)
 ```
 
-
 In this topic modeling assignment, we use the IMDB Movie Reviews (50K) dataset from Kaggle to analyze the review sentiment and pull out independent topic categories(i.e., movie genre) based on group of keywords.
 
 ## 1. The tidy text format
 
-First, we import data and break down each review into a list of words. Here, we tokenize at word level and treat each review as a separate “document”. We manually created a review number for each document since the movie titles for each review are not included in this dataset. Capitalization in reviews is kept for the initial screening. 
-
+First, we import data and break down each review into a list of words. Here, we tokenize at word level and treat each review as a separate "document". We manually created a review number for each document since the movie titles for each review are not included in this dataset. Capitalization in reviews is kept for the initial screening.
 
 ```{r,warning=FALSE}
 IMDB <- read.csv("IMDB Dataset.csv")
 
 IMDB_df <- tibble(IMDB)
 # glimpse(IMDB_df)
-# two columns: `sentiment` indicates whether the review is labeled negative or positive; `review` includes the text of each review.
+# two columns: `sentiment` indicates whether the review is labeled negative or 
+# positive; `review` includes the text of each review.
 head(IMDB_df)
-```
 
-
-
-```{r}
+# create review id 
 IMDB_df %>% 
   mutate(review_number = row_number()) ->IMDB_df 
 ```
-
 
 ```{r,warning=FALSE}
 
@@ -94,25 +89,27 @@ tidy_IMDB <- IMDB_df %>%
 tidy_IMDB
 ```
 
-`Stop_words` is a data frame from tidytext package that contains English stop words from three lexicons. Except for these stop-words, we also customize a list of domain specific stop-words. 
+`Stop_words` is a data frame from tidytext package that contains English stop words from three lexicons. Except for these stop-words, we also customize a list of domain specific stop-words.
 
 See below:
 
-Add "br" to be a customized stop-word as it's a leftover from html format.
-Add "film", "movie", "em" to customized stop-word as they are appearing in any review and meaningless
- 
+Add "br" to be a customized stop-word as it's a leftover from html format. Add "film", "movie", "em" to customized stop-word as they are appearing in any review and meaningless
+
 ```{r}
 data(stop_words)
-stop_words <- bind_rows(tibble(word = c("br", "film", "movie", "films", "movies", "characters", "character", "story", "time","people", "watching", "scene", "scenes", "plot", "watch", "real", "cast", "director", "lot", "pretty", "10", "actors", "1", "oz", "makes", "2","em"), 
-                               lexicon = c("custom")), 
-                        stop_words)
+stop_words <- bind_rows(tibble(word = c("br", "film", "movie", "films", 
+"movies", "characters", "character", "story", "time","people", "watching", 
+"scene", "scenes", "plot", "watch", "real", "cast", "director", "lot", "pretty",
+"10", "actors", "1", "oz", "makes", "2","em"), lexicon = c("custom")), 
+stop_words)
 
 tidy_IMDB <- tidy_IMDB %>%
   anti_join(stop_words)
 
 tidy_IMDB
 ```
-After remove all the stop-words, we try stemming and lemmatization. Stemming using rules to cut words down to their stems, operating on the word by itself. Lemmatization uses knowledge about a language’s structure to reduce words down to their lemmas, the canonical or dictionary forms of words, operating on the word in its context. As an important part of NLP pipelines, these methods would help us reduce the feature space of text data and should decrease the sparsity of text data. In this way, we may have a better fitted LDA model.
+
+After remove all the stop-words, we try stemming and lemmatization. Stemming using rules to cut words down to their stems, operating on the word by itself. Lemmatization uses knowledge about a language's structure to reduce words down to their lemmas, the canonical or dictionary forms of words, operating on the word in its context. As an important part of NLP pipelines, these methods would help us reduce the feature space of text data and should decrease the sparsity of text data. In this way, we may have a better fitted LDA model in the later process.
 
 ```{r,warning=FALSE}
 # stemming and lemmatization
@@ -138,7 +135,7 @@ tidy_IMDB %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(n, word)) +
   geom_col() +
-  labs(y = NULL,title = "most common words before lemmatization and stemming" )
+  labs(y = NULL,title = "most common words before lemmatization and stemming")
 
 # The most common words after lemmatization
 lemmatization %>%
@@ -158,8 +155,8 @@ stemming %>%
   geom_col() +
   labs(y = NULL, title = "most common words after stemming")
 ```
-It's easy to see that stemming would convert "plays" to "plai", while in lemmatization it would be "play". 
 
+It's easy to see that stemming would convert "plays" to "plai", while in lemmatization it would be "play".
 
 ```{r,warning=FALSE}
 
@@ -168,10 +165,10 @@ tidy_IMDB %>%
 
 ```
 
-<br>
-<br>
+<br> <br>
 
 ## 2. Sentiment analysis with tidy data
+
 ```{r,warning=FALSE}
 
 bing_word_counts <- tidy_IMDB %>%
@@ -196,7 +193,6 @@ bing_word_counts %>%
        y = NULL)
 ```
 
-
 ```{r,warning=FALSE}
 # Most common positive and negative words in IMDB
 
@@ -210,7 +206,8 @@ tidy_IMDB %>%
 ```{r}
 table(IMDB$sentiment)
 ```
-The polarity function scans the subjectivity lexicon for positive and negative words, and we can further visualize the following results to compare with our sentiment tags. The subjective dictionary used by the qdap package contains about 6800 words with tags, which would be introduced here to help measuring the density of keywords.
+
+The polarity function scans the subjectivity lexicon for positive and negative words, and we can further visualize the following results to compare with our sentiment tags. The subjective dictionary used by the qdap package contains about 6800 words with tags, which would be introduced here to help measuring the density of keywords
 
 ```{r}
 
@@ -234,11 +231,10 @@ ggplot(imdb.pol$all,aes(x=polarity,y=..density..))+
 
 ```
 
-
-<br>
-<br>
+<br> <br>
 
 ## 3. Analyzing word and document frequency: tf-idf
+
 ```{r,warning=FALSE}
 
 IMDB_tf_idf <-  tidy_IMDB %>%
@@ -249,19 +245,16 @@ IMDB_tf_idf <-  tidy_IMDB %>%
 IMDB_tf_idf
 ```
 
-
 ```{r}
 
 summary(IMDB_tf_idf)
 ```
 
-<br>
-<br>
+<br> <br>
 
 The inverse document frequency (and thus tf-idf) is very low (near zero) for words that occur in many of the reviews in a collection; this is how this approach decreases the weight for common words. The inverse document frequency will be a higher number for words that occur in fewer of the documents in the collection.
 
-<br>
-<br>
+<br> <br>
 
 ## 4. Relationships between words: n-grams and correlations
 
@@ -279,7 +272,7 @@ IMDB_bigrams %>%
   count(bigram, sort = TRUE)
 ```
 
-As one might expect, a lot of the most common bigrams are pairs of common (uninteresting) words, such as of the and to be: what we call “stop-words” (see Chapter 1). This is a useful time to use tidyr’s separate(), which splits a column into multiple based on a delimiter. This lets us separate it into two columns, “word1” and “word2”, at which point we can remove cases where either is a stop-word.
+As one might expect, a lot of the most common bigrams are pairs of common (uninteresting) words, such as of the and to be: what we call "stop-words" (see Chapter 1). This is a useful time to use tidyr's separate(), which splits a column into multiple based on a delimiter. This lets us separate it into two columns, "word1" and "word2", at which point we can remove cases where either is a stop-word.
 
 ```{r message=F,warning=F}
 
@@ -312,7 +305,6 @@ df %>%
   count(word1, word2, sort = TRUE)
 }
 ```
-
 
 ```{r,warning=FALSE}
 viz.bigram.graph <- function(bigrams,layout='fr') {
@@ -367,12 +359,9 @@ ig.neg<-neg.bigram %>%
 ig.neg   
 ```
 
-From above two tables and graphs, we found some bigrams present
-both in negative remarks and positie remarks, for example, bigram of `special` and `effects` 
-occupied the first place in both ranklist!
+From above two tables and graphs, we found some bigrams present both in negative remarks and positie remarks, for example, bigram of `special` and `effects` occupied the first place in both ranklist!
 
-So we'are about to show top bigrams in positive remarks only and 
-negative remarks only and both in positive and negative remarks as following:
+So we'are about to show top bigrams in positive remarks only and negative remarks only and both in positive and negative remarks as following:
 
 ```{r fig.width=9,fig.height=9}
 pos.top.bigram<-pos.bigram %>%
@@ -420,7 +409,7 @@ graph_from_data_frame() %>%
 
 <br>
 
-In other analyses, we may want to work with the recombined words. tidyr’s unite() function is the inverse of separate(), and lets us recombine the columns into one. Thus, “separate/filter/count/unite” let us find the most common bigrams not containing stop-words.
+In other analyses, we may want to work with the recombined words. tidyr's unite() function is the inverse of separate(), and lets us recombine the columns into one. Thus, "separate/filter/count/unite" let us find the most common bigrams not containing stop-words.
 
 ```{r,warning=FALSE}
 bigrams_united <- bigrams_filtered %>%
@@ -428,6 +417,7 @@ bigrams_united <- bigrams_filtered %>%
 
 bigrams_united
 ```
+
 <br>
 
 In other analyses, we may be interested in the most common trigrams, which are consecutive sequences of 3 words. We can find this by setting n = 3:
@@ -444,12 +434,11 @@ IMDB_df %>%
 
 ```
 
-<br>
-<br>
+<br> <br>
 
 ## 5. Converting to and from non-tidy formats
 
-Just as some existing text mining packages provide document-term matrices as sample data or output, some algorithms expect such matrices as input. Therefore, tidytext provides cast_ verbs for converting from a tidy form to these matrices.
+Just as some existing text mining packages provide document-term matrices as sample data or output, some algorithms expect such matrices as input. Therefore, tidytext provides cast_verbs for converting from a tidy form to these matrices.
 
 ```{r,warning=FALSE}
 
@@ -461,8 +450,7 @@ IMDB_dtm
 
 ```
 
-<br>
-<br>
+<br> <br>
 
 ## 6. Topic modeling
 
@@ -485,18 +473,20 @@ To start to exploring the lda model, we list the most frequent 30 terms in the t
 ```{r}
 imdb.topics <- topicmodels::topics(IMDB_lda, 1)
 ## In this case the output returns the top 30 terms.
-imdb.terms <- as.data.frame(topicmodels::terms(IMDB_lda, 30), stringsAsFactors = FALSE)
+imdb.terms <- as.data.frame(topicmodels::terms(IMDB_lda, 30), 
+                            stringsAsFactors = FALSE)
 imdb.terms[1:k]
 ```
 
-The tidytext package provides this method for extracting the per-topic-per-word probabilities, called (“beta”), from the model.
+The tidytext package provides this method for extracting the per-topic-per-word probabilities, called ("beta"), from the model.
 
 ```{r,warning=FALSE}
 IMDB_topics <- tidy(IMDB_lda, matrix = "beta")
 IMDB_topics
 ```
 
-We could use dplyr’s slice_max() to find the 10 terms that are most common within each topic and create a visualization.
+We could use dplyr's slice_max() to find the 10 terms that are most common within each topic and create a visualization.
+
 ```{r,warning=FALSE}
 top_terms <- IMDB_topics %>%
   group_by(topic) %>%
@@ -512,8 +502,8 @@ top_terms %>%
   scale_y_reordered()
 ```
 
-
 Now we use data after stemming and lemmatization to see if we have an improved results for topic identification. Because stemming would convert "plays" to "plai" which can be confusing for us to interpret the modeling results, we use lemmatized data to fit the model.
+
 ```{r}
 # LDA model fitting after stemming and lemmatization
 
@@ -522,7 +512,8 @@ lemma_dtm <- lemmatization%>% count(review_number, lemma) %>%
 # lemma_dtm still has sparsity of 100%, but has less terms: 100852
 
 lemma_lda <- LDA(lemma_dtm, k, control = list(seed = 1234))
-lemma_terms <- as.data.frame(topicmodels::terms(lemma_lda, 30), stringsAsFactors = FALSE)
+lemma_terms <- as.data.frame(topicmodels::terms(lemma_lda, 30), 
+                             stringsAsFactors = FALSE)
 lemma_terms[1:k]
 
 lemma_topics <- tidy(lemma_lda, matrix = "beta")
@@ -541,8 +532,8 @@ lemma_top_terms %>%
   scale_y_reordered()+
   labs(title = "K=6, After lemmatization LDA model results")
 ```
-The most common words for each topic now seems more exclusive and words like "played" don't appear in the plot. However, based on the output, setting topic(K) to 6 cannot really help us distinguish one topic from the other one by eyeballing.
-So we increase K to 10 given the data size of our dataset and the results improve by having less common words associated with each topic.
+
+The most common words for each topic now seems more exclusive and words like "played" don't appear in the plot. However, based on the output, setting topic(K) to 6 cannot really help us distinguish one topic from the other one by eyeballing. So we increase K to 10 given the data size of our dataset and the results improve by having less common words associated with each topic.
 
 ```{r}
 # choose nnumber of topics, 10
@@ -550,7 +541,8 @@ k = 10
 IMDB_lda <- LDA(IMDB_dtm, k, control = list(seed = 1234))
 
 IMDB_topics <- tidy(IMDB_lda, matrix = "beta")
-imdb.terms <- as.data.frame(topicmodels::terms(IMDB_lda, 30), stringsAsFactors = FALSE)
+imdb.terms <- as.data.frame(topicmodels::terms(IMDB_lda, 30), 
+                            stringsAsFactors = FALSE)
 imdb.terms[1:k]
 
 # LDA model fitting after stemming and lemmatization
@@ -562,7 +554,8 @@ lemma_dtm <- lemmatization%>% count(review_number, lemma) %>%
 lemma_lda <- LDA(lemma_dtm, k, control = list(seed = 1234))
 
 lemma_topics <- tidy(lemma_lda, matrix = "beta")
-lemma_terms <- as.data.frame(topicmodels::terms(lemma_lda, 30), stringsAsFactors = FALSE)
+lemma_terms <- as.data.frame(topicmodels::terms(lemma_lda, 30), 
+                             stringsAsFactors = FALSE)
 lemma_terms[1:k]
 
 lemma_top_terms <- lemma_topics %>%
@@ -580,19 +573,19 @@ lemma_top_terms %>%
   labs(title = "K=10, After lemmatization LDA model results")
 ```
 
-Besides estimating each topic as a mixture of words, LDA also models each document as a mixture of topics. We can examine the per-document-per-topic probabilities, called  (“gamma”), with the matrix = "gamma" argument to tidy().
- 
+Besides estimating each topic as a mixture of words, LDA also models each document as a mixture of topics. We can examine the per-document-per-topic probabilities, called ("gamma"), with the matrix = "gamma" argument to tidy().
+
 ```{r,warning=FALSE}
 IMDB_gamma <- tidy(IMDB_lda, matrix = "gamma")
 IMDB_gamma
 ```
+
 ## 7. Topic Modeling extension: Determine k number of topics
 
-IN section 6, we assume the number of topics to be 6 to conduct the LDA since not pre-topic tags were provided. However, one major aspect of LDA, is that we need to know the exact k number of optimal topics for the documents. In order to accomplish this task, we are going to use a harmonic mean method to determine k based on Martin Ponweiser’s thesis：
-
-https://research.wu.ac.at/en/publications/latent-dirichlet-allocation-in-r-3
+IN section 6, we assume the number of topics to be 6 to conduct the LDA since not pre-topic tags were provided. However, one major aspect of LDA, is that we need to know the exact k number of optimal topics for the documents. In order to accomplish this task, we are going to use a harmonic mean method to determine k based on Martin Ponweiser's thesis.(see README.md file)
 
 First, we set up the fuction for computing the harmonic mean
+
 ```{r}
 # The harmonic mean function
 harmonicMean <- function(logLikelihoods, precision = 2000L) {
@@ -602,8 +595,8 @@ harmonicMean <- function(logLikelihoods, precision = 2000L) {
 }
 ```
 
-
 In order to find the best value for k, we do this over a sequence of topic models with different vales for k. This will generate numerous topic models with different numbers of topics, creating a vector to hold the k values.
+
 ```{r}
 up_k <- 10 
 
@@ -613,8 +606,7 @@ burnin <- 1000
 iter <- 1000
 keep <- 50
 fitted_many <- lapply(seqk, function(k) topicmodels::LDA(IMDB_dtm, k = k,
-                                                     method = "Gibbs",control = list(burnin = burnin,
-                                                                         iter = iter, keep = keep) ))
+method = "Gibbs", control = list(burnin = burnin, iter = iter, keep = keep)))
 
 # extract logliks from each topic
 logLiks_many <- lapply(fitted_many, function(L)  L@logLiks[-c(1:(burnin/keep))])
@@ -624,8 +616,8 @@ hm_many <- sapply(logLiks_many, function(h) harmonicMean(h))
 
 ```
 
-
 We could visualize the results of harmonic means by plotting the results
+
 ```{r,warning=FALSE}
 ldaplot <- ggplot(data.frame(seqk, hm_many), aes(x=seqk, y=hm_many)) +
   geom_path(lwd=1.5) +
@@ -637,37 +629,15 @@ ldaplot <- ggplot(data.frame(seqk, hm_many), aes(x=seqk, y=hm_many)) +
   xlab('Number of Topics') +
   ylab('Harmonic Mean') +
   ggtitle(expression(atop("Latent Dirichlet Allocation Analysis of IMDB", 
-                          atop(italic("How many distinct topics in thE Reviews?"),
+                      atop(italic("How many distinct topics in thE Reviews?"),
                                ""))))
 ldaplot
 ```
+
 From the plot above, we can see that the optimal number of topics for our model is 10.
 
 The following code returns the optimal number of topics:
+
 ```{r}
 seqk[which.max(hm_many)]
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
